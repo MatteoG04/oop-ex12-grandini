@@ -2,10 +2,12 @@ package p12.exercise;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
 
@@ -17,12 +19,13 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
 
     @Override
     public Set<Q> availableQueues() {
-        return this.queues.keySet();
+        // Defensive copy
+        return Set.copyOf(this.queues.keySet());
     }
 
     @Override
     public void openNewQueue(Q queue) {
-        if (this.queues.containsKey(queue)) {
+        if (queueExists(queue)) {
             throw new IllegalArgumentException();
         }
         this.queues.put(queue, new ArrayDeque<>());
@@ -30,32 +33,35 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
 
     @Override
     public boolean isQueueEmpty(Q queue) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isQueueEmpty'");
+        return getQueue(queue).isEmpty();
     }
 
     @Override
     public void enqueue(T elem, Q queue) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'enqueue'");
+        getQueue(queue).add(elem);
     }
 
     @Override
     public T dequeue(Q queue) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'dequeue'");
+        return getQueue(queue).poll();
     }
 
     @Override
     public Map<Q, T> dequeueOneFromAllQueues() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'dequeueOneFromAllQueues'");
+        final Map<Q, T> map = new TreeMap<>();
+        for (Q queue : this.queues.keySet()) {
+            map.put(queue, getQueue(queue).poll());
+        }
+        return map;
     }
 
     @Override
     public Set<T> allEnqueuedElements() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'allEnqueuedElements'");
+        Set<T> elements = new HashSet<>();
+        for (Q queue : this.queues.keySet()) {
+            elements.addAll(getQueue(queue));
+        }
+        return elements;
     }
 
     @Override
@@ -68,6 +74,17 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
     public void closeQueueAndReallocate(Q queue) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'closeQueueAndReallocate'");
+    }
+
+    private boolean queueExists(Q queue) {
+        return this.queues.containsKey(queue);
+    }
+
+    private Queue<T> getQueue(Q queue) {
+        if (!queueExists(queue)) {
+            throw new IllegalArgumentException();
+        }
+        return this.queues.get(queue);
     }
 
 }
