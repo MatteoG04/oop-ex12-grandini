@@ -1,21 +1,31 @@
 package p12.exercise;
 
+import java.util.ArrayDeque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
 
+    private final Map<Q, Queue<T>> queues;
+
+    public MultiQueueImpl() {
+        this.queues = new HashMap<>();
+    }
+
     @Override
     public Set<Q> availableQueues() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'availableQueues'");
+        return this.queues.keySet();
     }
 
     @Override
     public void openNewQueue(Q queue) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'openNewQueue'");
+        if (this.queues.containsKey(queue)) {
+            throw new IllegalArgumentException();
+        }
+        this.queues.put(queue, new ArrayDeque<>());
     }
 
     @Override
