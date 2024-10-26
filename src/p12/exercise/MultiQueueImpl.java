@@ -49,11 +49,11 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
 
     @Override
     public Map<Q, T> dequeueOneFromAllQueues() {
-        final Map<Q, T> map = new TreeMap<>();
+        final Map<Q, T> outputMap = new TreeMap<>();
         for (Q queue : availableQueues()) {
-            map.put(queue, dequeue(queue));
+            outputMap.put(queue, dequeue(queue));
         }
-        return map;
+        return outputMap;
     }
 
     @Override
