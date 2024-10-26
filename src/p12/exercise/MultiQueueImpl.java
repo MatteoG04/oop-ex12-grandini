@@ -50,8 +50,8 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
     @Override
     public Map<Q, T> dequeueOneFromAllQueues() {
         final Map<Q, T> map = new TreeMap<>();
-        for (Q queue : this.queues.keySet()) {
-            map.put(queue, getQueue(queue).poll());
+        for (Q queue : availableQueues()) {
+            map.put(queue, dequeue(queue));
         }
         return map;
     }
@@ -59,7 +59,7 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
     @Override
     public Set<T> allEnqueuedElements() {
         final Set<T> elements = new HashSet<>();
-        for (Q queue : this.queues.keySet()) {
+        for (Q queue : availableQueues()) {
             elements.addAll(getQueue(queue));
         }
         return elements;
@@ -69,7 +69,7 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
     public List<T> dequeueAllFromQueue(Q queue) {
         final List<T> elem = new ArrayList<>();
         while (getQueue(queue).size() > 0) {
-            elem.add(getQueue(queue).poll());
+            elem.add(dequeue(queue));
         }
         return elem;
     }
@@ -87,7 +87,7 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
         boolean first = true;
         var minSize = 0;
         Q minSizedQueue = null;
-        for (Q q : this.queues.keySet()) {
+        for (Q q : availableQueues()) {
             var qSize = getQueue(q).size();
             if (first || qSize < minSize) {
                 minSize = qSize;
