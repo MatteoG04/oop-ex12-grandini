@@ -76,8 +76,7 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
 
     @Override
     public void closeQueueAndReallocate(Q queue) {
-        final var numOfAvailableQueues = availableQueues().size() - 1;
-        if (numOfAvailableQueues == 0) {
+        if (availableQueues().size() <= 1) {
             throw new IllegalStateException();
         }
 
