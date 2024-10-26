@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.ArrayList;
 
 public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
 
@@ -57,7 +58,7 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
 
     @Override
     public Set<T> allEnqueuedElements() {
-        Set<T> elements = new HashSet<>();
+        final Set<T> elements = new HashSet<>();
         for (Q queue : this.queues.keySet()) {
             elements.addAll(getQueue(queue));
         }
@@ -66,14 +67,36 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
 
     @Override
     public List<T> dequeueAllFromQueue(Q queue) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'dequeueAllFromQueue'");
+        final List<T> elem = new ArrayList<>();
+        while (getQueue(queue).size() > 0) {
+            elem.add(getQueue(queue).poll());
+        }
+        return elem;
     }
 
     @Override
     public void closeQueueAndReallocate(Q queue) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'closeQueueAndReallocate'");
+        final var numOfAvailableQueues = availableQueues().size() - 1;
+        if (numOfAvailableQueues == 0) {
+            throw new IllegalStateException();
+        }
+
+        final var elemsToReallocate = dequeueAllFromQueue(queue);
+        this.queues.remove(queue);
+        
+        boolean first = true;
+        var minSize = 0;
+        Q minSizedQueue = null;
+        for (Q q : this.queues.keySet()) {
+            var qSize = getQueue(q).size();
+            if (first || qSize < minSize) {
+                minSize = qSize;
+                minSizedQueue = q;
+                first = false;
+            }
+        }
+
+        getQueue(minSizedQueue).addAll(elemsToReallocate);        
     }
 
     private boolean queueExists(Q queue) {
