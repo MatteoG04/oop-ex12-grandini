@@ -79,23 +79,9 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
         if (availableQueues().size() <= 1) {
             throw new IllegalStateException();
         }
-
         final var elemsToReallocate = dequeueAllFromQueue(queue);
         this.queues.remove(queue);
-        
-        boolean first = true;
-        var minSize = 0;
-        Q minSizedQueue = null;
-        for (Q q : availableQueues()) {
-            var qSize = getQueue(q).size();
-            if (first || qSize < minSize) {
-                minSize = qSize;
-                minSizedQueue = q;
-                first = false;
-            }
-        }
-
-        getQueue(minSizedQueue).addAll(elemsToReallocate);        
+        getMinSizedQueue().addAll(elemsToReallocate);
     }
 
     private boolean queueExists(Q queue) {
@@ -107,6 +93,21 @@ public class MultiQueueImpl<T, Q> implements MultiQueue<T, Q>{
             throw new IllegalArgumentException();
         }
         return this.queues.get(queue);
+    }
+
+    private Queue<T> getMinSizedQueue() {
+        boolean first = true;
+        var minSize = 0;
+        Q minSizedQueue = null;
+        for (Q q : availableQueues()) {
+            var qSize = getQueue(q).size();
+            if (first || qSize < minSize) {
+                minSize = qSize;
+                minSizedQueue = q;
+                first = false;
+            }
+        }
+        return getQueue(minSizedQueue);
     }
 
 }
